@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { OrdersModule } from './orders/orders.module';
+import { DishesModule } from './dishes/dishes.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { OrdersModule } from './orders/orders.module';
     AuthenticationModule,
     RestaurantsModule,
     OrdersModule,
+    DishesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

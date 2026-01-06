@@ -7,9 +7,11 @@ import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../database/prisma.service';
 import { PrismaError } from '../database/prisma-error.enum';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { AddOrderItemDto } from './dto/add-order-item.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrderNotFoundException } from './order-not-found.exception';
 import { OrderStatus } from './order-status.type';
+import { DishNotFoundException } from '../dishes/dish-not-found.exception';
 
 type OrderForClient = {
   id: number;
@@ -17,7 +19,16 @@ type OrderForClient = {
   status: OrderStatus;
   createdAt: Date;
   updatedAt: Date;
-  additionalInfo: string;
+  additionalInfo: string | null;
+  items: Array<{
+    id: number;
+    quantity: number;
+    dish: {
+      id: number;
+      name: string;
+      price: number;
+    };
+  }>;
 };
 
 @Injectable()
@@ -73,6 +84,22 @@ export class OrdersService {
         createdAt: true,
         updatedAt: true,
         additionalInfo: true,
+        items: {
+          select: {
+            id: true,
+            quantity: true,
+            dish: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+              },
+            },
+          },
+          orderBy: {
+            id: 'asc',
+          },
+        },
       },
     });
 
@@ -128,6 +155,80 @@ export class OrdersService {
     if (order.restaurantId !== restaurantId) {
       throw new ForbiddenException();
     }
+  }
+
+  async addDishToOrder(
+    restaurantId: number,
+    orderId: number,
+    addOrderItemDto: AddOrderItemDto,
+  ) {
+    await this.assertOrderOwnership(restaurantId, orderId);
+
+    const dish = await this.prismaService.dish.findUnique({
+      where: {
+        id: addOrderItemDto.dishId,
+      },
+      select: {
+        id: true,
+        restaurantId: true,
+      },
+    });
+
+    if (!dish) {
+      throw new DishNotFoundException(addOrderItemDto.dishId);
+    }
+
+    const quantityToAdd = addOrderItemDto.quantity ?? 1;
+
+    return this.prismaService.orderItem.upsert({
+      where: {
+        orderId_dishId: {
+          orderId,
+          dishId: addOrderItemDto.dishId,
+        },
+      },
+      create: {
+        orderId,
+        dishId: addOrderItemDto.dishId,
+        quantity: quantityToAdd,
+      },
+      update: {
+        quantity: {
+          increment: quantityToAdd,
+        },
+      },
+      include: {
+        dish: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getOrderItemsForRestaurant(restaurantId: number, orderId: number) {
+    await this.assertOrderOwnership(restaurantId, orderId);
+
+    return this.prismaService.orderItem.findMany({
+      where: {
+        orderId,
+      },
+      include: {
+        dish: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+          },
+        },
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    });
   }
 
   getOrderStatusUrl(orderId: number) {

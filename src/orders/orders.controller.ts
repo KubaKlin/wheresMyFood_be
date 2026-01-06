@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthenticationGuard } from '../authentication/jwt-authentication.guard';
 import type { RequestWithUser } from '../authentication/request-with-user';
+import { AddOrderItemDto } from './dto/add-order-item.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrdersService } from './orders.service';
@@ -54,6 +55,22 @@ export class OrdersController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.ordersService.getQrPayloadForOrder(request.user.id, id);
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Post(':id/items')
+  async addItem(
+    @Req() request: RequestWithUser,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() addOrderItemDto: AddOrderItemDto,
+  ) {
+    return this.ordersService.addDishToOrder(request.user.id, id, addOrderItemDto);
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Get(':id/items')
+  async getItems(@Req() request: RequestWithUser, @Param('id', ParseIntPipe) id: number) {
+    return this.ordersService.getOrderItemsForRestaurant(request.user.id, id);
   }
 
   @UseGuards(JwtAuthenticationGuard)

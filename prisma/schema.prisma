@@ -16,6 +16,7 @@ model Restaurant {
   createdAt DateTime @default(now())
 
   orders Order[]
+  dishes Dish[]
 }
 
 enum OrderStatus {
@@ -33,4 +34,36 @@ model Order {
 
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   restaurantId Int
+
+  items OrderItem[]
+}
+
+model Dish {
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId Int
+
+  orderItems OrderItem[]
+
+  @@unique([restaurantId, name])
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order   Order @relation(fields: [orderId], references: [id])
+  orderId Int
+
+  dish   Dish @relation(fields: [dishId], references: [id])
+  dishId Int
+
+  @@unique([orderId, dishId])
 }
