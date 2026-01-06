@@ -3,10 +3,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
+import { DatabaseModule } from './database/database.module';
+import { AuthenticationModule } from './authentication/authentication.module';
+import { RestaurantsModule } from './restaurants/restaurants.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      isGlobal: true,
       validationSchema: Joi.object({
         DATABASE_URL: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
@@ -14,6 +18,9 @@ import Joi from 'joi';
         FRONTEND_URL: Joi.string().required(),
       }),
     }),
+    DatabaseModule,
+    AuthenticationModule,
+    RestaurantsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
