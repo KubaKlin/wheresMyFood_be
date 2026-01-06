@@ -42,6 +42,7 @@ export class OrdersService {
     return this.prismaService.order.create({
       data: {
         name: createOrderDto.name,
+        additionalInfo: createOrderDto.additionalInfo,
         restaurantId,
         status: 'IN_PROGRESS',
       },

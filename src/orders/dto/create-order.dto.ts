@@ -4,4 +4,7 @@ export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsString()
+  additionalInfo: string;
 }
