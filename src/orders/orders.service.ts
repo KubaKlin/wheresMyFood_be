@@ -54,6 +54,22 @@ export class OrdersService {
         restaurantId,
         status: 'IN_PROGRESS',
       },
+      include: {
+        items: {
+          include: {
+            dish: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+              },
+            },
+          },
+          orderBy: {
+            id: 'asc',
+          },
+        },
+      },
       orderBy: {
         id: 'desc',
       },
@@ -65,6 +81,22 @@ export class OrdersService {
       where: {
         restaurantId,
         status: 'READY_TO_TAKE',
+      },
+      include: {
+        items: {
+          include: {
+            dish: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+              },
+            },
+          },
+          orderBy: {
+            id: 'asc',
+          },
+        },
       },
       orderBy: {
         id: 'desc',
