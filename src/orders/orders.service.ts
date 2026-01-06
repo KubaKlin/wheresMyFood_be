@@ -1,0 +1,151 @@
+import {
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Prisma } from '../../generated/prisma';
+import { PrismaService } from '../database/prisma.service';
+import { PrismaError } from '../database/prisma-error.enum';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { OrderNotFoundException } from './order-not-found.exception';
+import { OrderStatus } from './order-status.type';
+
+type OrderForClient = {
+  id: number;
+  name: string;
+  status: OrderStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  additionalInfo: string;
+};
+
+@Injectable()
+export class OrdersService {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  create(restaurantId: number, createOrderDto: CreateOrderDto) {
+    return this.prismaService.order.create({
+      data: {
+        name: createOrderDto.name,
+        restaurantId,
+        status: 'IN_PROGRESS',
+      },
+    });
+  }
+
+  getCurrentForRestaurant(restaurantId: number) {
+    return this.prismaService.order.findMany({
+      where: {
+        restaurantId,
+        status: 'IN_PROGRESS',
+      },
+      orderBy: {
+        id: 'desc',
+      },
+    });
+  }
+
+  getArchivedForRestaurant(restaurantId: number) {
+    return this.prismaService.order.findMany({
+      where: {
+        restaurantId,
+        status: 'READY_TO_TAKE',
+      },
+      orderBy: {
+        id: 'desc',
+      },
+    });
+  }
+
+  async getClientStatus(orderId: number): Promise<OrderForClient> {
+    const order = await this.prismaService.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        additionalInfo: true,
+      },
+    });
+
+    if (!order) {
+      throw new OrderNotFoundException(orderId);
+    }
+
+    return order as OrderForClient;
+  }
+
+  async updateStatus(
+    restaurantId: number,
+    orderId: number,
+    updateOrderStatusDto: UpdateOrderStatusDto,
+  ) {
+    await this.assertOrderOwnership(restaurantId, orderId);
+
+    try {
+      return await this.prismaService.order.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          status: updateOrderStatusDto.status,
+        },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === PrismaError.RecordDoesNotExist
+      ) {
+        throw new OrderNotFoundException(orderId);
+      }
+      throw error;
+    }
+  }
+
+  private async assertOrderOwnership(restaurantId: number, orderId: number) {
+    const order = await this.prismaService.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      select: {
+        id: true,
+        restaurantId: true,
+      },
+    });
+
+    if (!order) {
+      throw new OrderNotFoundException(orderId);
+    }
+
+    if (order.restaurantId !== restaurantId) {
+      throw new ForbiddenException();
+    }
+  }
+
+  getOrderStatusUrl(orderId: number) {
+    const baseUrl =
+      this.configService.get<string>('PUBLIC_APP_URL') ??
+      this.configService.get<string>('FRONTEND_URL');
+    return `${baseUrl}/orders/${orderId}`;
+  }
+
+  async getQrPayloadForOrder(restaurantId: number, orderId: number) {
+    await this.assertOrderOwnership(restaurantId, orderId);
+    const statusUrl = this.getOrderStatusUrl(orderId);
+    return {
+      orderId,
+      statusUrl,
+      qrPayload: statusUrl,
+    };
+  }
+}
+
+

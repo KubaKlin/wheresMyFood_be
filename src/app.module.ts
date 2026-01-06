@@ -6,6 +6,7 @@ import Joi from 'joi';
 import { DatabaseModule } from './database/database.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
     DatabaseModule,
     AuthenticationModule,
     RestaurantsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
