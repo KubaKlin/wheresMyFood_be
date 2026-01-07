@@ -8,6 +8,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { OrdersModule } from './orders/orders.module';
 import { DishesModule } from './dishes/dishes.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DishesModule } from './dishes/dishes.module';
     RestaurantsModule,
     OrdersModule,
     DishesModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
