@@ -9,5 +9,3 @@ export interface RequestWithUser extends Request {
     createdAt: Date;
   };
 }
-
-

@@ -30,7 +30,9 @@ export class RestaurantsService {
         error instanceof PrismaClientKnownRequestError &&
         error.code === PrismaError.UniqueConstraintFailed
       ) {
-        throw new ConflictException('Restaurant with that email already exists');
+        throw new ConflictException(
+          'Restaurant with that email already exists',
+        );
       }
       throw error;
     }
@@ -63,5 +65,3 @@ export class RestaurantsService {
     return restaurant;
   }
 }
-
-

@@ -59,5 +59,3 @@ export class AuthenticationService {
     return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
   }
 }
-
-

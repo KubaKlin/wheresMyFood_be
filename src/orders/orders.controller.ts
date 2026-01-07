@@ -37,9 +37,9 @@ export class OrdersController {
   }
 
   @UseGuards(JwtAuthenticationGuard)
-  @Get('archived')
-  async getArchived(@Req() request: RequestWithUser) {
-    return this.ordersService.getArchivedForRestaurant(request.user.id);
+  @Get('completed')
+  async getCompleted(@Req() request: RequestWithUser) {
+    return this.ordersService.getCompletedForRestaurant(request.user.id);
   }
 
   // Public endpoint for client website after scanning QR
@@ -64,12 +64,19 @@ export class OrdersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() addOrderItemDto: AddOrderItemDto,
   ) {
-    return this.ordersService.addDishToOrder(request.user.id, id, addOrderItemDto);
+    return this.ordersService.addDishToOrder(
+      request.user.id,
+      id,
+      addOrderItemDto,
+    );
   }
 
   @UseGuards(JwtAuthenticationGuard)
   @Get(':id/items')
-  async getItems(@Req() request: RequestWithUser, @Param('id', ParseIntPipe) id: number) {
+  async getItems(
+    @Req() request: RequestWithUser,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     return this.ordersService.getOrderItemsForRestaurant(request.user.id, id);
   }
 
@@ -88,5 +95,3 @@ export class OrdersController {
     );
   }
 }
-
-

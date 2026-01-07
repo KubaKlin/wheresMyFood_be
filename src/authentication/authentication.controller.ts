@@ -51,5 +51,3 @@ export class AuthenticationController {
     return request.user;
   }
 }
-
-

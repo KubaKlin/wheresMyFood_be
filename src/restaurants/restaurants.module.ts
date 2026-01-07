@@ -10,5 +10,3 @@ import { RestaurantsService } from './restaurants.service';
   exports: [RestaurantsService],
 })
 export class RestaurantsModule {}
-
-

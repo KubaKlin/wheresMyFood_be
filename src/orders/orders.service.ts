@@ -1,7 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../database/prisma.service';
@@ -77,7 +74,7 @@ export class OrdersService {
     });
   }
 
-  getArchivedForRestaurant(restaurantId: number) {
+  getCompletedForRestaurant(restaurantId: number) {
     return this.prismaService.order.findMany({
       where: {
         restaurantId,
@@ -281,5 +278,3 @@ export class OrdersService {
     };
   }
 }
-
-

@@ -34,13 +34,19 @@ export class DishesController {
 
   @UseGuards(JwtAuthenticationGuard)
   @Get(':id')
-  getById(@Req() request: RequestWithUser, @Param('id', ParseIntPipe) id: number) {
+  getById(
+    @Req() request: RequestWithUser,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     return this.dishesService.getById(request.user.id, id);
   }
 
   @UseGuards(JwtAuthenticationGuard)
   @Delete(':id')
-  async delete(@Req() request: RequestWithUser, @Param('id', ParseIntPipe) id: number) {
+  async delete(
+    @Req() request: RequestWithUser,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     await this.dishesService.delete(request.user.id, id);
   }
 

@@ -26,5 +26,3 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return this.restaurantsService.getById(payload.userId);
   }
 }
-
-

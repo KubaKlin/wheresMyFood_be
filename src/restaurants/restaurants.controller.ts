@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
 
 @Controller('restaurants')
@@ -15,5 +10,3 @@ export class RestaurantsController {
     return this.restaurantsService.getById(id);
   }
 }
-
-

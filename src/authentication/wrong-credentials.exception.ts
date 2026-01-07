@@ -5,5 +5,3 @@ export class WrongCredentialsException extends UnauthorizedException {
     super('Wrong credentials');
   }
 }
-
-
