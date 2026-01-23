@@ -66,8 +66,8 @@ describe('The AuthenticationController', () => {
           id: 1,
           email: 'test@restaurant.com',
           name: 'Test Restaurant',
-          password: 'hashed',
           createdAt: new Date('2026-01-01T00:00:00.000Z'),
+          inviteCode: 'invite-code',
         });
       });
 
@@ -85,8 +85,8 @@ describe('The AuthenticationController', () => {
           id: 1,
           email: 'test@restaurant.com',
           name: 'Test Restaurant',
-          password: 'hashed',
           createdAt: '2026-01-01T00:00:00.000Z',
+          inviteCode: 'invite-code',
         });
       });
     });
@@ -108,7 +108,6 @@ describe('The AuthenticationController', () => {
           id: 1,
           email: 'test@restaurant.com',
           name: 'Test Restaurant',
-          password: 'hashed',
           createdAt: new Date('2026-01-01T00:00:00.000Z'),
         });
         getCookieWithJwtTokenMock.mockReturnValue(
@@ -160,8 +159,9 @@ describe('The AuthenticationController', () => {
           id: 1,
           name: 'Test Restaurant',
           email: 'test@restaurant.com',
-          password: 'hashed',
           createdAt: '2026-01-01T00:00:00.000Z',
+          restaurantId: 1,
+          type: 'restaurant',
         });
     });
 

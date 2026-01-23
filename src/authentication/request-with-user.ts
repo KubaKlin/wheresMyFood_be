@@ -5,7 +5,9 @@ export interface RequestWithUser extends Request {
     id: number;
     email: string;
     name: string;
-    password: string;
     createdAt: Date;
+    type?: 'restaurant' | 'user';
+    restaurantId?: number;
+    userId?: number;
   };
 }

@@ -13,15 +13,28 @@ model Restaurant {
   email     String   @unique
   name      String
   password  String
+  inviteCode String? @unique
   createdAt DateTime @default(now())
 
   orders Order[]
   dishes Dish[]
+  users  User[]
 }
 
 enum OrderStatus {
   IN_PROGRESS
   READY_TO_TAKE
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId Int
 }
 
 model Order {

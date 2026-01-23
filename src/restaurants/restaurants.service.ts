@@ -8,6 +8,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaError } from '../database/prisma-error.enum';
 import { PrismaService } from '../database/prisma.service';
 import { SignUpDto } from '../authentication/dto/sign-up.dto';
+import { generateInviteCode } from '../utilities/generate-invite-code';
 
 @Injectable()
 export class RestaurantsService {
@@ -23,6 +24,7 @@ export class RestaurantsService {
           email: signUpData.email,
           name: signUpData.name,
           password: hashedPassword,
+          inviteCode: generateInviteCode(),
         },
       });
     } catch (error: unknown) {
@@ -63,5 +65,22 @@ export class RestaurantsService {
     }
 
     return restaurant;
+  }
+
+  async getByInviteCode(inviteCode: string) {
+    const restaurant = await this.prismaService.restaurant.findUnique({
+      where: { inviteCode },
+    });
+    if (!restaurant) {
+      throw new NotFoundException('Invalid invite code');
+    }
+    return restaurant;
+  }
+
+  async refreshInviteCode(restaurantId: number) {
+    return this.prismaService.restaurant.update({
+      where: { id: restaurantId },
+      data: { inviteCode: generateInviteCode() },
+    });
   }
 }

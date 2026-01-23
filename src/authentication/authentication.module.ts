@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { DatabaseModule } from '../database/database.module';
 import { RestaurantsModule } from '../restaurants/restaurants.module';
+import { UsersModule } from '../users/users.module';
 import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './authentication.service';
 import { JwtStrategy } from './jwt.strategy';
@@ -11,6 +12,7 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     DatabaseModule,
     RestaurantsModule,
+    UsersModule,
     ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

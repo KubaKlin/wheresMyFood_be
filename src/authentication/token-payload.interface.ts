@@ -1,3 +1,6 @@
+export type TokenSubjectType = 'restaurant' | 'user';
+
 export interface TokenPayload {
-  userId: number;
+  subjectId: number;
+  subjectType: TokenSubjectType;
 }
