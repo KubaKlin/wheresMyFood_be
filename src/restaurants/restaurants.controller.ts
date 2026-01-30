@@ -1,6 +1,5 @@
 import {
   Controller,
-  ForbiddenException,
   Get,
   Param,
   ParseIntPipe,
@@ -27,18 +26,7 @@ export class RestaurantsController {
     @Param('id', ParseIntPipe) id: number,
     @Req() request: RequestWithUser,
   ) {
-    if (request.user.type !== 'restaurant' || request.user.id !== id) {
-      throw new ForbiddenException();
-    }
-
-    const restaurant = await this.restaurantsService.getById(id);
-    const inviteCode = restaurant.inviteCode;
-    return {
-      inviteCode,
-      inviteUrl: inviteCode
-        ? `${process.env.FRONTEND_URL}/sign-up?inviteCode=${inviteCode}`
-        : null,
-    };
+    return this.restaurantsService.getInviteInfo(id, request.user);
   }
 
   @UseGuards(JwtAuthenticationGuard)
@@ -47,17 +35,6 @@ export class RestaurantsController {
     @Param('id', ParseIntPipe) id: number,
     @Req() request: RequestWithUser,
   ) {
-    if (request.user.type !== 'restaurant' || request.user.id !== id) {
-      throw new ForbiddenException();
-    }
-
-    const restaurant = await this.restaurantsService.refreshInviteCode(id);
-    const inviteCode = restaurant.inviteCode;
-    return {
-      inviteCode,
-      inviteUrl: inviteCode
-        ? `${process.env.FRONTEND_URL}/sign-up?inviteCode=${inviteCode}`
-        : null,
-    };
+    return this.restaurantsService.refreshInviteInfo(id, request.user);
   }
 }

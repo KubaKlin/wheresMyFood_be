@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,11 +9,38 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaError } from '../database/prisma-error.enum';
 import { PrismaService } from '../database/prisma.service';
 import { SignUpDto } from '../authentication/dto/sign-up.dto';
+import type { RequestWithUser } from '../authentication/request-with-user';
 import { generateInviteCode } from '../utilities/generate-invite-code';
+
+type RestaurantInviteInfo = {
+  inviteCode: string | null;
+  inviteUrl: string | null;
+};
 
 @Injectable()
 export class RestaurantsService {
   constructor(private readonly prismaService: PrismaService) {}
+
+  private assertRestaurantOwnerAccess(
+    restaurantId: number,
+    user: RequestWithUser['user'],
+  ) {
+    if (user.type !== 'restaurant' || user.id !== restaurantId) {
+      throw new ForbiddenException();
+    }
+  }
+
+  private buildInviteInfo(inviteCode: string | null): RestaurantInviteInfo {
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (!frontendUrl || !inviteCode) {
+      return { inviteCode, inviteUrl: null };
+    }
+
+    return {
+      inviteCode,
+      inviteUrl: `${frontendUrl}/sign-up?inviteCode=${encodeURIComponent(inviteCode)}`,
+    };
+  }
 
   async createAccount(signUpData: SignUpDto) {
     const saltRounds = 10;
@@ -67,6 +95,13 @@ export class RestaurantsService {
     return restaurant;
   }
 
+  async getInviteInfo(restaurantId: number, user: RequestWithUser['user']) {
+    this.assertRestaurantOwnerAccess(restaurantId, user);
+
+    const restaurant = await this.getById(restaurantId);
+    return this.buildInviteInfo(restaurant.inviteCode);
+  }
+
   async getByInviteCode(inviteCode: string) {
     const restaurant = await this.prismaService.restaurant.findUnique({
       where: { inviteCode },
@@ -82,5 +117,12 @@ export class RestaurantsService {
       where: { id: restaurantId },
       data: { inviteCode: generateInviteCode() },
     });
+  }
+
+  async refreshInviteInfo(restaurantId: number, user: RequestWithUser['user']) {
+    this.assertRestaurantOwnerAccess(restaurantId, user);
+
+    const restaurant = await this.refreshInviteCode(restaurantId);
+    return this.buildInviteInfo(restaurant.inviteCode);
   }
 }
