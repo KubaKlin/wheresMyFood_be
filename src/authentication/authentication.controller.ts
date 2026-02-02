@@ -15,6 +15,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { JwtAuthenticationGuard } from './jwt-authentication.guard';
 import type { RequestWithUser } from './request-with-user';
 import { UserSignUpDto } from './dto/user-sign-up.dto';
+import { UserType } from './user-type.enum';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -56,7 +57,7 @@ export class AuthenticationController {
       );
     const cookie = this.authenticationService.getCookieWithJwtToken(
       user.id,
-      'user',
+      UserType.User,
     );
     response.setHeader('Set-Cookie', cookie);
 

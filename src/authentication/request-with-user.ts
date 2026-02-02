@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { UserType } from './user-type.enum';
 
 export interface RequestWithUser extends Request {
   user: {
@@ -6,7 +7,7 @@ export interface RequestWithUser extends Request {
     email: string;
     name: string;
     createdAt: Date;
-    type?: 'restaurant' | 'user';
+    type?: UserType;
     restaurantId?: number;
     userId?: number;
   };

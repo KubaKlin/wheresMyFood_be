@@ -10,6 +10,7 @@ import { PrismaError } from '../database/prisma-error.enum';
 import { PrismaService } from '../database/prisma.service';
 import { SignUpDto } from '../authentication/dto/sign-up.dto';
 import type { RequestWithUser } from '../authentication/request-with-user';
+import { UserType } from '../authentication/user-type.enum';
 import { generateInviteCode } from '../utilities/generate-invite-code';
 
 type RestaurantInviteInfo = {
@@ -38,7 +39,7 @@ export class RestaurantsService {
     restaurantId: number,
     user: RequestWithUser['user'],
   ) {
-    if (user.type !== 'restaurant' || user.id !== restaurantId) {
+    if (user.type !== UserType.Restaurant || user.id !== restaurantId) {
       throw new ForbiddenException();
     }
   }

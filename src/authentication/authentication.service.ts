@@ -9,6 +9,7 @@ import { WrongCredentialsException } from './wrong-credentials.exception';
 import { RestaurantsService } from '../restaurants/restaurants.service';
 import { UsersService } from '../users/users.service';
 import { UserSignUpDto } from './dto/user-sign-up.dto';
+import { UserType } from './user-type.enum';
 
 @Injectable()
 export class AuthenticationService {
@@ -89,7 +90,7 @@ export class AuthenticationService {
 
   getCookieWithJwtToken(
     subjectId: number,
-    subjectType: TokenPayload['subjectType'] = 'restaurant',
+    subjectType: TokenPayload['subjectType'] = UserType.Restaurant,
   ) {
     const payload: TokenPayload = { subjectId, subjectType };
     const token = this.jwtService.sign(payload);
