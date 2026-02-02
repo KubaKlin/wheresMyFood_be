@@ -21,6 +21,19 @@ type RestaurantInviteInfo = {
 export class RestaurantsService {
   constructor(private readonly prismaService: PrismaService) {}
 
+  private static readonly INVITE_CODE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+  private getInviteCodeExpiresAt() {
+    return new Date(Date.now() + RestaurantsService.INVITE_CODE_TTL_MS);
+  }
+
+  private isInviteCodeExpired(inviteCodeExpiresAt: Date | null | undefined) {
+    if (!inviteCodeExpiresAt) {
+      return true;
+    }
+    return inviteCodeExpiresAt.getTime() <= Date.now();
+  }
+
   private assertRestaurantOwnerAccess(
     restaurantId: number,
     user: RequestWithUser['user'],
@@ -53,6 +66,7 @@ export class RestaurantsService {
           name: signUpData.name,
           password: hashedPassword,
           inviteCode: generateInviteCode(),
+          inviteCodeExpiresAt: this.getInviteCodeExpiresAt(),
         },
       });
     } catch (error: unknown) {
@@ -106,7 +120,10 @@ export class RestaurantsService {
     const restaurant = await this.prismaService.restaurant.findUnique({
       where: { inviteCode },
     });
-    if (!restaurant) {
+    if (
+      !restaurant ||
+      this.isInviteCodeExpired(restaurant.inviteCodeExpiresAt)
+    ) {
       throw new NotFoundException('Invalid invite code');
     }
     return restaurant;
@@ -115,7 +132,10 @@ export class RestaurantsService {
   async refreshInviteCode(restaurantId: number) {
     return this.prismaService.restaurant.update({
       where: { id: restaurantId },
-      data: { inviteCode: generateInviteCode() },
+      data: {
+        inviteCode: generateInviteCode(),
+        inviteCodeExpiresAt: this.getInviteCodeExpiresAt(),
+      },
     });
   }
 

@@ -21,7 +21,7 @@ export class AuthenticationService {
 
   async signUp(signUpData: SignUpDto) {
     const restaurant = await this.restaurantsService.createAccount(signUpData);
-    const { password, ...safeRestaurant } = restaurant;
+    const { password, inviteCodeExpiresAt, ...safeRestaurant } = restaurant;
     return safeRestaurant;
   }
 

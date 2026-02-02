@@ -14,6 +14,7 @@ model Restaurant {
   name      String
   password  String
   inviteCode String? @unique
+  inviteCodeExpiresAt DateTime?
   createdAt DateTime @default(now())
 
   orders Order[]
