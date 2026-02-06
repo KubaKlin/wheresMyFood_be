@@ -1,3 +1,8 @@
+import { UserType } from './user-type.enum';
+
+export type TokenSubjectType = UserType;
+
 export interface TokenPayload {
-  userId: number;
+  subjectId: number;
+  subjectType: TokenSubjectType;
 }
