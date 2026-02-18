@@ -85,7 +85,7 @@ export class StatisticsService {
           name: dish.name,
           price: dish.price,
           quantity: group._sum.quantity ?? 0,
-        } satisfies TopDish;
+        };
       })
       .filter((x): x is TopDish => x !== null);
   }
