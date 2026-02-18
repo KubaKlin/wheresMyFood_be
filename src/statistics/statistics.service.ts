@@ -105,49 +105,47 @@ export class StatisticsService {
 
   async getMoneyEarned(restaurantId: number, range: StatisticsRange) {
     const start = this.getRangeStart(range);
+    return this.getMoneyEarnedFromDb(restaurantId, start);
+  }
 
-    const grouped = await this.prismaService.orderItem.groupBy({
-      by: ['dishId'],
-      where: {
-        order: {
-          restaurantId,
-          status: 'READY_TO_TAKE',
-          updatedAt: {
-            gte: start,
-          },
-        },
-      },
-      _sum: {
-        quantity: true,
-      },
-    });
+  private readonly getMoneyEarnedFromDb = async (
+    restaurantId: number,
+    start: Date,
+  ): Promise<number> => {
+    const rows = await this.prismaService.$queryRaw<
+      { moneyEarned: bigint | number | string | null }[]
+    >`
+      SELECT
+        COALESCE(SUM(oi.quantity * d.price), 0) AS "moneyEarned"
+      FROM "OrderItem" AS oi
+      INNER JOIN "Dish" AS d ON d.id = oi."dishId"
+      INNER JOIN "Order" AS o ON o.id = oi."orderId"
+      WHERE o."restaurantId" = ${restaurantId}
+        AND d."restaurantId" = ${restaurantId}
+        AND o.status = 'READY_TO_TAKE'
+        AND o."updatedAt" >= ${start};
+    `;
 
-    const dishIds = grouped.map((group) => group.dishId);
-    if (dishIds.length === 0) {
-      return 0;
+    const moneyEarned = rows?.[0]?.moneyEarned ?? 0;
+    return this.coerceDbNumber(moneyEarned);
+  };
+
+  private readonly coerceDbNumber = (value: unknown): number => {
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : 0;
     }
 
-    const dishes = await this.prismaService.dish.findMany({
-      where: {
-        id: {
-          in: dishIds,
-        },
-        restaurantId,
-      },
-      select: {
-        id: true,
-        price: true,
-      },
-    });
+    if (typeof value === 'bigint') {
+      return Number(value);
+    }
 
-    const priceById = new Map(dishes.map((dish) => [dish.id, dish.price]));
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
 
-    return grouped.reduce((sum, group) => {
-      const price = priceById.get(group.dishId) ?? 0;
-      const qty = group._sum.quantity ?? 0;
-      return sum + price * qty;
-    }, 0);
-  }
+    return 0;
+  };
 
   async getOverview(restaurantId: number) {
     const ranges: StatisticsRange[] = ['today', '7d', '30d'];
