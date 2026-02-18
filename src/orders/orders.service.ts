@@ -137,7 +137,7 @@ export class OrdersService {
       throw new OrderNotFoundException(orderId);
     }
 
-    return order as OrderForClient;
+    return order;
   }
 
   async updateStatus(

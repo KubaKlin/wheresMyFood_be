@@ -28,7 +28,10 @@ export class StatisticsService {
     return start;
   }
 
-  async getTopOrderedDishes(restaurantId: number, range: StatisticsRange) {
+  async getTopOrderedDishes(
+    restaurantId: number,
+    range: StatisticsRange,
+  ): Promise<TopDish[]> {
     const start = this.getRangeStart(range);
 
     const grouped = await this.prismaService.orderItem.groupBy({
@@ -55,7 +58,7 @@ export class StatisticsService {
 
     const dishIds = grouped.map((group) => group.dishId);
     if (dishIds.length === 0) {
-      return [] as TopDish[];
+      return [];
     }
 
     const dishes = await this.prismaService.dish.findMany({
@@ -158,14 +161,23 @@ export class StatisticsService {
           this.getMoneyEarned(restaurantId, range),
         ]);
 
-        return [
+        const entry: [
+          StatisticsRange,
+          {
+            topDishes: TopDish[];
+            completedOrders: number;
+            moneyEarned: number;
+          },
+        ] = [
           range,
           {
             topDishes,
             completedOrders,
             moneyEarned,
           },
-        ] as const;
+        ];
+
+        return entry;
       }),
     );
 

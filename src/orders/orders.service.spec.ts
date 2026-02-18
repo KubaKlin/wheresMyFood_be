@@ -29,7 +29,7 @@ describe('The OrdersService', () => {
     return new Prisma.PrismaClientKnownRequestError('Known Prisma error', {
       code,
       clientVersion: 'test',
-    } as any);
+    });
   };
 
   beforeEach(async () => {
