@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  inviteCode String? @unique
+  inviteCodeExpiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  orders Order[]
+  dishes Dish[]
+  users  User[]
+}
+
+enum OrderStatus {
+  IN_PROGRESS
+  READY_TO_TAKE
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId Int
+}
+
+model Order {
+  id             Int         @id @default(autoincrement())
+  name           String
+  status         OrderStatus @default(IN_PROGRESS)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  additionalInfo String?
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId Int
+
+  items OrderItem[]
+}
+
+model Dish {
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId Int
+
+  orderItems OrderItem[]
+
+  @@unique([restaurantId, name])
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order   Order @relation(fields: [orderId], references: [id])
+  orderId Int
+
+  dish   Dish @relation(fields: [dishId], references: [id])
+  dishId Int
+
+  @@unique([orderId, dishId])
+}
