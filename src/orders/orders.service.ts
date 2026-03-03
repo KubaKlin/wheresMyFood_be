@@ -263,7 +263,6 @@ export class OrdersService {
 
   getOrderStatusUrl(orderId: number) {
     const baseUrl =
-      this.configService.get<string>('PUBLIC_APP_URL') ??
       this.configService.get<string>('FRONTEND_URL');
     return `${baseUrl}/orders/${orderId}`;
   }
